@@ -1,7 +1,7 @@
 // ************************************************************************************
 // *           Userland driver for the 8 digits Nixie Clock/Counter from              *
 // *  http://www.kosbo.com/index.php?option=com_content&view=article&id=51&Itemid=60  *
-// *                                  Version 0.1                                     *
+// *                                  Version 0.3                                     *
 // *                     Copyright by Christian C. Gruber 2011                        *
 // ************************************************************************************
 
@@ -20,15 +20,16 @@ main( int argc, char *argv[] )
 {
   // Three command line arguments are required
   // Usage information
-  if ( argc != 4 )
+  if ( argc != 5 )
   {
-    fprintf(stderr,"Usage: %s [UTC led device] [nixie tubes device] [delay in us] (Example: %s /dev/led/gpio11 /dev/ttyu0 1000) \n", argv[0], argv[0] );
+    fprintf(stderr,"Usage: %s [UTC led device] [nixie tubes device] [delay in us] [min for the nixie dance] (Example: %s /dev/led/gpio11 /dev/ttyu0 1000 30) \n", argv[0], argv[0] );
   }
   // Starting
   else
   {
+    int dance = atoi(argv[4]);
     int delay = atoi(argv[3]);
-    fprintf(stderr,"%s Version 0.1\nCopyright 2011 Christian C. Gruber <cgchilia.com>\nUTC LED device = %s\nNixie tubes device = %s \nDelay in us = %d\n", argv[0], argv[1], argv[2], delay );
+    fprintf(stderr,"%s Version 0.3\nCopyright 2011 Christian C. Gruber <cg@chilia.com>\nUTC LED device       = %s\nNixie tubes device   = %s\nDelay                = %d [us]\nDance time           = 23, 43 and %d [min]\n", argv[0], argv[1], argv[2], delay, dance);
     FILE *output;
     FILE* led;
     FILE* port;
@@ -74,7 +75,7 @@ main( int argc, char *argv[] )
           fprintf(port, "%02d %02d %02d\n", tm->tm_hour, tm->tm_min, tm->tm_sec);
         }
         // Timing statistics go to stderr
-        fprintf(stderr,"The %02d:%02d:%02d tick is %04d us late, but within a %d us range (offset: %08d, %s).\n", tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec, delay, offset, state);
+        fprintf(stderr,"The %02d:%02d:%02d tick is %04d us late but within a %d us range (offset: %08d, %s).\r", tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec, delay, offset, state);
         // Light red led when ntpd is not running
         if ( offset == 0 )
         {
@@ -109,6 +110,90 @@ main( int argc, char *argv[] )
         pclose(output);
         // This half a second sleep is important for cpu load descrase ...
         usleep(500000);
+        // Do the nixie dance here
+        while ( ( tm->tm_min == 23 ) | ( tm->tm_min == 43 ) | ( tm->tm_min == dance ) )
+        {
+          gettimeofday(&tv,&tz);
+          tm=localtime(&tv.tv_sec);
+          fprintf(stderr,"The %02d:%02d is Nixie dance time for one minute ...                                                       \r", tm->tm_hour, tm->tm_min);
+          led = fopen(argv[1], "w" );
+          fprintf(led,"1");
+          fclose(led);
+          int i = 0;
+          int wait = 30000;
+          while (i <= 9 )
+          {
+            fprintf(port,"%d       \n", i);
+            usleep(wait);
+            fprintf(port," %d      \n", i);
+            usleep(wait);
+            fprintf(port,"  %d     \n", i);
+            usleep(wait);
+            fprintf(port,"   %d    \n", i);
+            usleep(wait);
+            fprintf(port,"    %d   \n", i);
+            usleep(wait);
+            fprintf(port,"     %d  \n", i);
+            usleep(wait);
+            fprintf(port,"      %d \n", i);
+            usleep(wait);
+            fprintf(port,"       %d\n", i);
+            usleep(wait);
+            fprintf(port,"      %d \n", i);
+            usleep(wait);
+            fprintf(port,"     %d  \n", i);
+            usleep(wait);
+            fprintf(port,"    %d   \n", i);
+            usleep(wait);
+            fprintf(port,"   %d    \n", i);
+            usleep(wait);
+            fprintf(port,"  %d     \n", i);
+            usleep(wait);
+            fprintf(port," %d      \n", i);
+            usleep(wait);
+            fprintf(port,"%d       \n", i);
+            usleep(wait);
+            i++;
+          }
+          i=9;
+          while (i >= 0 )
+          {
+            fprintf(port,"%d       \n", i);
+            usleep(wait);
+            fprintf(port," %d      \n", i);
+            usleep(wait);
+            fprintf(port,"  %d     \n", i);
+            usleep(wait);
+            fprintf(port,"   %d    \n", i);
+            usleep(wait);
+            fprintf(port,"    %d   \n", i);
+            usleep(wait);
+            fprintf(port,"     %d  \n", i);
+            usleep(wait);
+            fprintf(port,"      %d \n", i);
+            usleep(wait);
+            fprintf(port,"       %d\n", i);
+            usleep(wait);
+            fprintf(port,"      %d \n", i);
+            usleep(wait);
+            fprintf(port,"     %d  \n", i);
+            usleep(wait);
+            fprintf(port,"    %d   \n", i);
+            usleep(wait);
+            fprintf(port,"   %d    \n", i);
+            usleep(wait);
+            fprintf(port,"  %d     \n", i);
+            usleep(wait);
+            fprintf(port," %d      \n", i);
+            usleep(wait);
+            fprintf(port,"%d       \n", i);
+            usleep(wait);
+            i--;
+          }
+          led = fopen(argv[1], "w" );
+          fprintf(led,"0");
+          fclose(led);
+        }
       }
     }
   fclose(port);
