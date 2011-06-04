@@ -105,7 +105,7 @@ main( int argc, char *argv[] )
           fclose(led);
         }  
         // Get ntpd offset
-        output = popen(" printf '%08s' `ntpdc -c kern 2> /dev/null| sed 's/-//g' | awk ' /^pll offset:/ { print $3 * 1000000000 }'` ", "r");
+        output = popen(" printf '%08s' `ntptime | grep interval | cut -d' ' -f4 | sed 's/-//g' | awk '{ print $1 * 1000 }'` ", "r");
         fscanf( output, "%d", & offset );
         pclose(output);
         // This half a second sleep is important for cpu load descrase ...
