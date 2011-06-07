@@ -1,7 +1,7 @@
 // ************************************************************************************
 // *           Userland driver for the 8 digits Nixie Clock/Counter from              *
 // *  http://www.kosbo.com/index.php?option=com_content&view=article&id=51&Itemid=60  *
-// *                                  Version 0.3                                     *
+// *                                  Version 0.4                                     *
 // *                     Copyright by Christian C. Gruber 2011                        *
 // ************************************************************************************
 
@@ -29,7 +29,7 @@ main( int argc, char *argv[] )
   {
     int dance = atoi(argv[4]);
     int delay = atoi(argv[3]);
-    fprintf(stderr,"%s Version 0.3\nCopyright 2011 Christian C. Gruber <cg@chilia.com>\nUTC LED device       = %s\nNixie tubes device   = %s\nDelay                = %d [us]\nDance time           = 23, 43 and %d [min]\n", argv[0], argv[1], argv[2], delay, dance);
+    fprintf(stderr,"%s Version 0.4\nCopyright 2011 Christian C. Gruber <cg@chilia.com>\nUTC LED device       = %s\nNixie tubes device   = %s\nDelay                = %d [us]\nDance time           = 23, 43 and %d [min]\n", argv[0], argv[1], argv[2], delay, dance);
     FILE *output;
     FILE* led;
     FILE* port;
@@ -64,7 +64,7 @@ main( int argc, char *argv[] )
           fprintf(port,"%08d\n", offset);
           }
         }
-        // Output date between the 40th and 45th second
+        // Output a between the 40th and 45th second
         else if ( ( tm->tm_sec > 40 ) && ( tm->tm_sec < 45 ) )
         {
           fprintf(port,"%02d %02d %02d\n", tm->tm_mday, tm->tm_mon, tm->tm_year - 100 );
